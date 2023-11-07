@@ -1,5 +1,6 @@
+require("dotenv").config();
 const express = require('express');
-const { report, addNames, sendMsg } = require('../botActions');
+const { report, addNames, sendMsg,callItADay } = require('../botActions');
 
 const router = express.Router();
 
@@ -12,6 +13,9 @@ router.post('/webhook', (req, res) => {
         addNames(chatId, names);
     } else if (receivedText === '/report') {
         report(chatId);
+    } 
+     else if (receivedText === '/callitaday') {
+        callItADay(chatId);
     } else {
         sendMsg(chatId, "Unsupported command!");
     }
