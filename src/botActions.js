@@ -1,39 +1,53 @@
 require("dotenv").config();
 const axios = require("axios");
 const { usersEaten, friends, PRICE_PER_LUNCH } = require("./botHelpers");
-const Report = require("./models/report");
+const db = require("./utils/firebase");
+const {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  arrayUnion,
+  updateDoc,
+  doc,
+  setDoc,
+  getDoc,
+  arrayRemove,
+  deleteDoc,
+  serverTimestamp,
+} = require("firebase/firestore");
 
-// const TELEGRAM_API = `https://api.telegram.org/bot`;
-const TELEGRAM_API = `https://api.telegram.org/bot/${process.env.TELEGRAM_TOKEN}`;
+const TELEGRAM_API = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}`;
 
 const callItADay = async (chatId) => {
   try {
     const usersEatenList = Object.keys(usersEaten);
     const totalExpense = usersEatenList.length * PRICE_PER_LUNCH;
-
-    // Creating a new report instance
-    const report = new Report({
+    const data = {
+      date: serverTimestamp(), // Use server timestamp
       users_eaten: usersEatenList,
       total_amount: totalExpense,
-    });
+    };
+    // Add report to Firestore
+    const reportRef = collection(db, "records"); // Firestore assigns a unique ID to the doc
+    await addDoc(reportRef, data);
 
-    // Saving the report to the database
-    await report.save();
-
-    // Resetting the usersEaten for the next day
+    // Clear the local tracking object after saving to Firestore
     for (let user in usersEaten) {
       delete usersEaten[user];
     }
-
     // Inform the user
     await sendMsg(
       chatId,
       "Today's report has been saved and the list has been reset for the next day."
     );
   } catch (error) {
-    console.error("Error saving the report:", error);
-    // Handle error, inform the user
-    await sendMsg(chatId, "An error occurred while saving the report.");
+    console.error("Error saving the report to Firestore:", error);
+    await sendMsg(
+      chatId,
+      "An error occurred while saving the report to the database."
+    );
   }
 };
 
