@@ -20,6 +20,36 @@ const {
 
 const TELEGRAM_API = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}`;
 
+const createUser = async (chatId, name) => {
+  try {
+    const ID = chatId.toString();
+    const capName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    const docSnap = await getDoc(doc(db, "users", ID));
+    if (docSnap.exists()) {
+      return await sendMsg(
+        chatId,
+        `User already created by Name : ${capName}.\nTry with another phone!`
+      );
+    } else {
+      const data = { 
+        userName: capName,
+        userId: chatId,
+        createdAt: serverTimestamp(),
+      };
+      console.log(data);
+      const userDocRef = doc(db, "users", ID);
+      await setDoc(userDocRef, data);
+
+      await sendMsg(
+        chatId,
+        `User created by ID : ${ID} and Name : ${capName}. \nStore this ID Somewhere safe, it will be used for further purpose.`
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const callItADay = async (chatId) => {
   try {
     const usersEatenList = Object.keys(usersEaten);
@@ -28,6 +58,7 @@ const callItADay = async (chatId) => {
       date: serverTimestamp(), // Use server timestamp
       users_eaten: usersEatenList,
       total_amount: totalExpense,
+      chatId: chatId,
     };
     // Add report to Firestore
     const reportRef = collection(db, "records"); // Firestore assigns a unique ID to the doc
@@ -86,4 +117,5 @@ module.exports = {
   addNames,
   sendMsg,
   callItADay,
+  createUser,
 };
