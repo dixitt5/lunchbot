@@ -12,8 +12,9 @@ app.use(bodyParser.json());
 
 app.use("/bot", botRoutes);
 
-app.listen(PORT, () => {
+app.listen(PORT, (req, res) => {
   console.log(`Server is running on port ${process.env.PORT}`);
+  res.send({ message: "Hello, from the server!" });
 });
 
 app.use("/hello", (req, res) => {
