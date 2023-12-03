@@ -1,6 +1,6 @@
 require("dotenv").config();
 const axios = require("axios");
-const { usersEaten, friends, PRICE_PER_LUNCH } = require("./botHelpers");
+const { usersEaten, PRICE_PER_LUNCH } = require("./botHelpers");
 const db = require("./utils/firebase");
 const {
   collection,
@@ -91,9 +91,9 @@ const add = (chatId, names) => {
     const trimmedName = name.trim();
     const capName =
       trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1).toLowerCase();
-    if (friends.includes(capName)) {
+    
       usersEaten[capName] = true;
-    }
+    
   });
 
   sendMsg(chatId, `Marked ${names} as eaten today.`);
