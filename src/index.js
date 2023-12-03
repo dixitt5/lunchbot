@@ -5,7 +5,9 @@ const botRoutes = require("./routes/botRoutes");
 require("./utils/firebase");
 const app = express();
 const PORT = process.env.PORT || 3000;
+const cors = require("cors");
 
+app.use(cors({ origin: ["*"] }));
 app.use(bodyParser.json());
 
 app.use("/bot", botRoutes);
